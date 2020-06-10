@@ -26,28 +26,19 @@ sudo ldconfig
 ```
 local cjson = require("cjson")
 local geo = require("resty.maxminddb")
-local arg_ip = ngx.var.arg_ip
-local arg_node = ngx.var.arg_node
 
 if not geo.initted() then
         geo.init("/opt/geoip/GeoLite2-City_20200609/GeoLite2-City.mmdb")
 end
 
-
-local res,err=geo.lookup(arg_ip or ngx.var.remote_addr)
+local res,err=geo.lookup(ngx.var.remote_addr)
 
 ngx.header["Content-Type"]="application/json";
 
 if not res then
-        ngx.say("Please check the ip address you provided: <div style='color:red'>",arg_ip,"</div>")
-        ngx.log(ngx.ERR,' failed to lookup by ip , reason :',err)
+        ngx.log(ngx.ERR, 'failed to lookup by ip, reason: ',err)
 else
         ngx.say(cjson.encode(res))
-
-        if arg_node then
-                ngx.say("node name:",ngx.var.arg_node, " , value:",cjson.encode(res[ngx.var.arg_node] or {}))
-        end
-
 end
 ```
 
